@@ -1,0 +1,24 @@
+import numpy as np # importing numpy
+import cv2 # importing opencv library
+import matplotlib.pyplot as plt # importing pyplot as the image will be printed on it
+img = cv2.imread('golfball.jpg') # image file stored in img
+gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) # image converted to grayscale
+blured = cv2.GaussianBlur(gray_image,(5,5),0) # image smoothened for a clear and good contour
+ret,thresh = cv2.threshold(blured,93,255,0) # thresholded in binary to find contours & centroid
+im2,contours,hierarchy = cv2.findContours(thresh,1,2) # finds all contours
+contour_sizes = [(cv2.contourArea(contour), contour) for contour in contours]
+# the statement above finds the area under a contour and it is stored in contour_sizes.
+biggest_contour = max(contour_sizes, key=lambda x: x[0])[1]
+#biggest_contour stores the contour having the maximum area enclosed under it
+(x,y),radius = cv2.minEnclosingCircle(biggest_contour) # finds all parameters for the circle
+center = (int(x), int(y)) # stores the center of the contour circle
+radius = int(radius) # stores the radius of the circle
+img = cv2.circle(img, center, radius, (255,0,0), 10) # draws the circle onto the image
+M = cv2.moments(thresh) # moment calculated for the thresholded image
+cX = int(M["m10"] / M["m00"]) # centroid calculated according to the original definition
+cY = int(M["m01"] / M["m00"])
+cv2.circle(img, (cX, cY), 25, (0, 0, 255), -1) # centroid of the circle calculated
+cv2.putText(img, "centroid", (cX - 40, cY - 40),cv2.FONT_HERSHEY_SIMPLEX, 5, (0, 0, 0), 2)
+#optional statement, to show that the image has centroid written in front of it
+plt.imshow(img, cmap = 'gray', interpolation = 'bicubic') # shows image on a pyplot
+plt.show()
